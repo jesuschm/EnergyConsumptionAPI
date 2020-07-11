@@ -82,6 +82,7 @@ Adicionalmente, para poder realizar todas las peticiones de la API (excepto la p
 1. Estudiaría el rendimiento de juntar los tres endpoints (6), (7), (8) en uno solo para reducir las llamadas a la API en una sola en vez de en tres, aunque el servicio perdiese flexibilidad. Quizás añadiría ambas posibilidades (petición de toda la información que no vaya a la gráfica a la vez que dar la posibilidad de poder extraer solo uno de los datos por separado).
 2. Las fórmulas usadas para los endpoints (6), (7), (8) han sido implementadas en función de una rápida investigación. Sería necesario hablar con el cliente para conocer el cálculo exacto.
 3. Implementar algún tipo de token sería interesante, como el tipo Bearer, más ampliamente usado, sería otras de mis mejoras.
+4. La integración con Swagger para hacer la documentación de la API sencilla de entender y usar sería una de las mejoras más importantes.
 
 ## Autor
 
