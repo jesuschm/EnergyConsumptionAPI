@@ -78,6 +78,14 @@ Adicionalmente, para poder realizar todas las peticiones de la API (excepto la p
 
 ![Consumption model](https://github.com/jesuschm/EnergyConsumptionAPI/blob/master/resources/Authentication_Postman.png?raw=true)
 
+## Test unitario
+Para ejemplificar el uso de test unitarios en django. 
+
+Este test prueba la función GetEnergyConsumptiom, función que devuelve uno de los datos del dashboard. Para ejecutarlo hay que introducir el siguiente comando:
+```
+manage.py tests test
+```
+
 ## Mejoras
 TODO_1. Parametrizar nombre del CSV. 
 TODO_2. Securizar django secret key. 
