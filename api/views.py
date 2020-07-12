@@ -87,7 +87,7 @@ class ImportConsumptions(APIView):
     def get(self, request, format = None):
         Consumption.objects.all().delete()
 
-        with open('./resources/MonitoringReportLittle.csv') as csv_file:
+        with open('./resources/MonitoringReport.csv') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             line_count = 0
             for row in csv_reader:
@@ -149,7 +149,8 @@ class GetEnergyConsumption(APIView):
     authentication_class = (TokenAuthentication,)
 
     def post(self, request, format = None):
-        return getConsumptionAttribute(request, 'energy', 'sum')
+        data = JSONParser().parse(request)
+        return JSONResponse(getConsumptionAttribute(request.method, data[0], 'energy', 'sum'))
     
     
 class GetInstalledPower(APIView):
@@ -157,7 +158,8 @@ class GetInstalledPower(APIView):
     authentication_class = (TokenAuthentication,)
 
     def post(self, request, format = None):
-        return getConsumptionAttribute(request, 'maximeter', 'avg')
+        data = JSONParser().parse(request)
+        return JSONResponse(getConsumptionAttribute(request.method, data[0], 'maximeter', 'avg'))
 
         
 class GetReactiveEnergyConsumption(APIView):
@@ -165,14 +167,13 @@ class GetReactiveEnergyConsumption(APIView):
     authentication_class = (TokenAuthentication,)
 
     def post(self, request, format = None):
-        return getConsumptionAttribute(request, 'reactive_energy', 'sum')
-    
-def getConsumptionAttribute(request, attribute, function):
-        
-    if request.method == 'POST':
         data = JSONParser().parse(request)
-        filters = data[0]
-
+        return JSONResponse(getConsumptionAttribute(request.method, data[0], 'reactive_energy', 'sum'))
+    
+def getConsumptionAttribute(method, filters, attribute, function, consumptionSet = Consumption):
+        
+    if method == 'POST':
+        
         init_date = datetime.now()
         end_date = datetime.now()
         
@@ -182,7 +183,7 @@ def getConsumptionAttribute(request, attribute, function):
         if 'end_date' in filters:
             end_date = datetime.strptime(filters['end_date'], APP_DATETIME_FORMAT)
         
-        consumptions = Consumption.objects.filter(date__range=[init_date, end_date])
+        consumptions = consumptionSet.objects.filter(date__range=[init_date, end_date])
     else:
         return HttpResponse(status=403)
     
@@ -191,4 +192,4 @@ def getConsumptionAttribute(request, attribute, function):
     elif function == 'avg':
         energyConsumption= mean([ getattr(c, attribute) for c in consumptions.all() ])       
     
-    return JSONResponse(energyConsumption)
+    return energyConsumption
