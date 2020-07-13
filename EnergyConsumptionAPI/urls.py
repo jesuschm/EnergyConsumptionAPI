@@ -20,8 +20,13 @@ from api.views import Login, Logout
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # Parte de la ruta para los métodos de la api (versión 1)
     path('api/v1/', include(('api.urls', 'api'))),
+    # Endpoint para obtener el token del usuario según unas credenciales. 
     path('generate_token/', views.obtain_auth_token),
+    # Interfaz de prueba para logarse visualmente y no mediante el endpoint de generate_token
     path('login/', Login.as_view(), name = 'Login'),
+    # Endpoint para destruir el token de identificación del usuario y así deslogarse.
     path('logout/', Logout.as_view(), name = 'Logout'),
 ]

@@ -27,7 +27,7 @@ from EnergyConsumptionAPI.settings import APP_DATETIME_FORMAT, INPUT_DATETIME_FO
 
 class JSONResponse(HttpResponse):
     """
-    An HttpResponse that renders its content into JSON.
+    Método de terceros: An HttpResponse that renders its content into JSON.
     """
 
     def __init__(self, data, **kwargs):
@@ -36,6 +36,10 @@ class JSONResponse(HttpResponse):
         super(JSONResponse, self).__init__(content, **kwargs)
 
 class UserList(generics.ListCreateAPIView):
+    """
+    Vista de API para visualizar todos los usuarios del sistema 
+    """
+
     permission_classes = (IsAuthenticated,)
     authentication_class = (TokenAuthentication,)
 
@@ -43,6 +47,10 @@ class UserList(generics.ListCreateAPIView):
     serializer_class = UserSerializer
 
 class ConsumptionList(generics.ListCreateAPIView):
+    """
+    Vista de API para visualizar todos las medidas de consumo del sistema 
+    """
+
     permission_classes = (IsAuthenticated,)
     authentication_class = (TokenAuthentication,)
     
@@ -50,6 +58,11 @@ class ConsumptionList(generics.ListCreateAPIView):
     serializer_class = ConsumptionSerializer
 
 class Login(FormView):
+    """
+        Formulario para logarse visualmente
+    """
+
+    # La plantilla html existente en la carpeta /templates/ del proyecto
     template_name = "login.html"
     form_class = AuthenticationForm
     success_url = reverse_lazy('api:user_list')
@@ -72,6 +85,10 @@ class Login(FormView):
             return super(Login, self).form_valid(form)
 
 class Logout(APIView):
+    """
+        Función que destruye el token de identificación del usuario y así realizar el deslogado.
+    """
+
     permission_classes = (IsAuthenticated,)
     authentication_class = (TokenAuthentication,)
     
@@ -80,20 +97,26 @@ class Logout(APIView):
         logout(request)
         return Response(status = status.HTTP_200_OK)
 
-class ImportConsumptions(APIView):    
+class ImportConsumptions(APIView):   
+    """
+        Función que limpia la base de datos de medidas de consumo y vuelve a poblarla con los elementos de un CSV
+    """ 
     permission_classes = (IsAuthenticated,)
     authentication_class = (TokenAuthentication,)
 
     def get(self, request, format = None):
+        # Primero se limpian todos las medidas existentes
         Consumption.objects.all().delete()
 
+        # Se busca el fichero CSV dentro de la carpeta resources
         with open('./resources/MonitoringReport.csv') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             line_count = 0
             for row in csv_reader:
                 if line_count == 0:
-                    line_count += 1
+                    line_count += 1 # Se obvia la cabecera
                 else:
+                    # Y si no es cabecera se recogen cada uno de los campos y se construye un objeto Consumption para luego ser grabado en la base de datos
                     dt_date = datetime.strptime(row[0], INPUT_DATETIME_FORMAT)
 
                     current_consumption = Consumption(date=dt_date.strftime(APP_DATETIME_FORMAT),
@@ -110,9 +133,15 @@ class ImportConsumptions(APIView):
                     line_count += 1
 
         line_count -= 1
+        
+        # Para terminar, se devuelve al usuario un mensaje informato para saber cuántas lineas se han insertado
         return JSONResponse(f'Lines count: {line_count}')
 
 class GetUsers(APIView):    
+    """
+        Función que devuelve todos los usuarios del sistema
+    """
+
     permission_classes = (IsAuthenticated,)
     authentication_class = (TokenAuthentication,)
 
@@ -123,6 +152,10 @@ class GetUsers(APIView):
         return JSONResponse(serializer.data)
         
 class GetConsumptions(APIView):    
+    """
+        Función para obtener todos los consumos del sistema según una fecha de inicio y otra de fin
+    """
+
     permission_classes = (IsAuthenticated,)
     authentication_class = (TokenAuthentication,)
 
@@ -145,15 +178,23 @@ class GetConsumptions(APIView):
         return JSONResponse(serializer.data)
 
 class GetEnergyConsumption(APIView):    
+    """
+        Función para obtener la energía consumida según una fecha de inicio y otra de fin
+    """
+    
     permission_classes = (IsAuthenticated,)
     authentication_class = (TokenAuthentication,)
 
     def post(self, request, format = None):
         data = JSONParser().parse(request)
+        # En data[0] se encuentran los filtros
         return JSONResponse(getConsumptionAttribute(request.method, data[0], 'energy', 'sum'))
     
-    
 class GetInstalledPower(APIView):
+    """
+        Función para obtener la potencia instalada según una fecha de inicio y otra de fin
+    """
+    
     permission_classes = (IsAuthenticated,)
     authentication_class = (TokenAuthentication,)
 
@@ -161,8 +202,11 @@ class GetInstalledPower(APIView):
         data = JSONParser().parse(request)
         return JSONResponse(getConsumptionAttribute(request.method, data[0], 'maximeter', 'avg'))
 
-        
 class GetReactiveEnergyConsumption(APIView):
+    """
+        Función para obtener la energía reactiva consumida según una fecha de inicio y otra de fin
+    """
+
     permission_classes = (IsAuthenticated,)
     authentication_class = (TokenAuthentication,)
 
@@ -171,7 +215,10 @@ class GetReactiveEnergyConsumption(APIView):
         return JSONResponse(getConsumptionAttribute(request.method, data[0], 'reactive_energy', 'sum'))
     
 def getConsumptionAttribute(method, filters, attribute, function, consumptionSet = Consumption):
-        
+    """
+        Método que permite realizar un cálculo sobre un campo de la entidad Consumption. 
+    """
+
     if method == 'POST':
         
         init_date = datetime.now()

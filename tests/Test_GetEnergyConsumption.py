@@ -11,7 +11,15 @@ from EnergyConsumptionAPI.settings import APP_DATETIME_FORMAT
 
 
 class GetEnergyConsumptionTestCase(TestCase):
+    """
+       Este test case asegura el buen funcionamiento del cálculo de la energía consumida.               
+    """
     def setUp(self):
+        """
+            El setup consiste en definir un valor por defecto para fecha y cinco para el campo energía (el que será usado para el cálculo).
+            Además se fija el valor esperado para la suma de los cinco valores de energía.
+            Para terminar el setup, realiza cinco creaciones de la entidad Consumption.
+        """
         self.datetime = datetime.now().strftime(APP_DATETIME_FORMAT)
         self.expected_result = 28.5
 
@@ -29,6 +37,10 @@ class GetEnergyConsumptionTestCase(TestCase):
             consumption.save()
 
     def test_getEnergyConsumption(self):
+        """
+            Para realizar la llamada al método a testear, se utiliza la fecha por defecto para el filtrado y se compara el resultado
+            con la suma devuelta por el método.
+        """
 
         filters = {"init_date": self.datetime, "end_date": self.datetime}        
         energySum = getConsumptionAttribute('POST', filters, 'energy', 'sum')        
