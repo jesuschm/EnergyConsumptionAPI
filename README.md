@@ -25,7 +25,7 @@ python -m venv myvenv
 ```
 2. Activar el entorno, introduciendo el siguiente comando
 ```
-myvenv\Scripts\activate
+source myvenv\Scripts\activate
 ```
 3. Instalar Django
 ```
